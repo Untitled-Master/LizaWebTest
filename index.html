@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LizaAPI Example</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap');
+
+        :root {
+          --font-family: 'JetBrains Mono', monospace;
+        }
+
+        body {
+          margin: 0;
+          padding: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          background: #191919;
+          font-family: var(--font-family);
+        }
+
+        .container {
+          width: 400px; /* Fixed width */
+          height: 500px; /* Fixed height */
+          background: #292929;
+          border-radius: 12px;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0px 0px 60px #7012bd98;
+          overflow: hidden; /* Hide overflow to prevent horizontal scrollbar */
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto; /* Enable vertical scrollbar for chat */
+            scrollbar-width: thin;
+            scrollbar-color: #6b25a5 #292929;
+            padding: 20px;
+            word-wrap: break-word;
+        }
+
+        .user-bubble,
+        .response-bubble {
+            max-width: 70%;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 12px;
+            word-wrap: break-word;
+        }
+
+        .user-bubble {
+            background: #6b25a5;
+            align-self: flex-end;
+            color: #fff;
+        }
+
+        .response-bubble {
+            background: #292929;
+            align-self: flex-start;
+            color: #fff;
+        }
+
+        .user-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #444;
+        }
+
+        input {
+          flex: 1;
+          padding: 10px;
+          font-family: var(--font-family);
+          border: none;
+          border-radius: 5px 0 0 5px;
+        }
+
+        button.check-button {
+          flex-shrink: 0;
+          background: #6b25a5;
+          color: #fff;
+          padding: 10px 15px; /* Smaller padding for the button */
+          font-size: 1rem;
+          font-family: var(--font-family);
+          border: none;
+          border-radius: 0 5px 5px 0;
+          cursor: pointer;
+          transition: background 0.3s, transform 0.2s;
+        }
+
+        button.check-button:hover {
+          background: #7012bd;
+          transform: translateY(-5px);
+        }
+
+        .loader {
+            border: 6px solid rgba(255, 255, 255, 0.3); /* Smaller border for the loader */
+            border-top: 6px solid #7012bd;
+            border-radius: 50%;
+            width: 30px; /* Smaller width for the loader */
+            height: 30px; /* Smaller height for the loader */
+            animation: spin 2s linear infinite;
+            margin: auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="chat-container" id="chatContainer">
+        <!-- Chat bubbles will be added dynamically here -->
+    </div>
+    <div class="user-input">
+        <input type="text" id="userInput" placeholder="Enter your text...">
+        <button class="check-button" onclick="makeRequest()">✈️</button>
+        <div id="loader" class="loader" style="display: none;"></div>
+    </div>
+</div>
+
+<script>
+function makeRequest() {
+    var userInput = document.getElementById('userInput').value.trim();
+    if (!userInput) {
+        alert('Please enter text.');
+        return;
+    }
+
+    var chatContainer = document.getElementById('chatContainer');
+    
+    // User message bubble
+    var userBubble = document.createElement('div');
+    userBubble.className = 'user-bubble';
+    userBubble.innerText = userInput;
+    chatContainer.appendChild(userBubble);
+
+    document.getElementById('loader').style.display = 'block';
+
+    var requestData = {
+        text: userInput
+    };
+
+    fetch('https://lizaapi.u1u1u1u1u1u1u1.repl.co/lizaapi', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Response from /lizaapi:', data);
+
+        // LizaAPI message bubble
+        var responseBubble = document.createElement('div');
+        responseBubble.className = 'response-bubble';
+        responseBubble.innerText = data.response;
+        chatContainer.appendChild(responseBubble);
+
+        document.getElementById('loader').style.display = 'none';
+        
+        // Scroll to the bottom of the chat
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    })
+    .catch(error => {
+        console.error('Error making request:', error);
+        document.getElementById('loader').style.display = 'none';
+
+        // Error message bubble
+        var errorBubble = document.createElement('div');
+        errorBubble.className = 'response-bubble';
+        errorBubble.innerText = 'Error: ' + error.message;
+        errorBubble.style.background = '#c22';
+        chatContainer.appendChild(errorBubble);
+        
+        // Scroll to the bottom of the chat
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    });
+
+    document.getElementById('userInput').value = '';
+}
+</script>
+
+</body>
+</html>
